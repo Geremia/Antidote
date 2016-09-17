@@ -9,7 +9,7 @@
 import UIKit
 
 protocol LoginCoordinatorDelegate: class {
-    func loginCoordinatorDidLogin(coordinator: LoginCoordinator, manager: OCTManager, password: String)
+    func loginCoordinatorDidLogin(_ coordinator: LoginCoordinator, manager: OCTManager, password: String)
 }
 
 private enum UserInfoKey: String {
@@ -22,11 +22,11 @@ private enum UserInfoKey: String {
 class LoginCoordinator {
     weak var delegate: LoginCoordinatorDelegate?
 
-    private let window: UIWindow
-    private let theme: Theme
-    private let navigationController: UINavigationController
+    fileprivate let window: UIWindow
+    fileprivate let theme: Theme
+    fileprivate let navigationController: UINavigationController
 
-    private var createAccountCoordinator: LoginCreateAccountCoordinator?
+    fileprivate var createAccountCoordinator: LoginCreateAccountCoordinator?
 
     init(theme: Theme, window: UIWindow) {
         self.window = window
@@ -49,7 +49,7 @@ class LoginCoordinator {
 
 // MARK: TopCoordinatorProtocol
 extension LoginCoordinator: TopCoordinatorProtocol {
-    func startWithOptions(options: CoordinatorOptions?) {
+    func startWithOptions(_ options: CoordinatorOptions?) {
         let profileNames = ProfileManager().allProfileNames
 
         let controller: UIViewController = (profileNames.count > 0) ? createFormController() : createChoiceController()
@@ -58,98 +58,96 @@ extension LoginCoordinator: TopCoordinatorProtocol {
         window.rootViewController = navigationController
     }
     
-    func handleLocalNotification(notification: UILocalNotification) {
+    func handleLocalNotification(_ notification: UILocalNotification) {
         // nop
     }
 
-    func handleInboxURL(url: NSURL) {
+    func handleInboxURL(_ url: URL) {
         guard url.isToxURL() else {
             return
         }
 
-        guard let fileName = url.lastPathComponent else {
-            return
-        }
+        let fileName = url.lastPathComponent
 
         let style: UIAlertControllerStyle
 
         switch InterfaceIdiom.current() {
             case .iPhone:
-                style = .ActionSheet
+                style = .actionSheet
             case .iPad:
-                style = .Alert
+                style = .alert
         }
 
         let alert = UIAlertController(title: nil, message: fileName, preferredStyle: style)
 
-        alert.addAction(UIAlertAction(title: String(localized: "create_profile"), style: .Default) { [unowned self] _ -> Void in
+        alert.addAction(UIAlertAction(title: String(localized: "create_profile"), style: .default) { [unowned self] _ -> Void in
             self.importToxProfileFromURL(url)
         })
 
-        alert.addAction(UIAlertAction(title: String(localized: "alert_cancel"), style: .Cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: String(localized: "alert_cancel"), style: .cancel, handler: nil))
 
-        navigationController.presentViewController(alert, animated: true, completion: nil)
+        navigationController.present(alert, animated: true, completion: nil)
     }
 }
 
 extension LoginCoordinator: LoginFormControllerDelegate {
-    func loginFormControllerLogin(controller: LoginFormController, profileName: String, password: String?) {
+    func loginFormControllerLogin(_ controller: LoginFormController, profileName: String, password: String?) {
         loginWithProfile(profileName, password: password, errorClosure: { error in
-            handleErrorWithType(.CreateOCTManager, error: error)
+            handleErrorWithType(.createOCTManager, error: error)
         })
     }
 
-    func loginFormControllerCreateAccount(controller: LoginFormController) {
+    func loginFormControllerCreateAccount(_ controller: LoginFormController) {
         showCreateAccountController()
     }
 
-    func loginFormControllerImportProfile(controller: LoginFormController) {
+    func loginFormControllerImportProfile(_ controller: LoginFormController) {
         showImportProfileController()
     }
 
-    func loginFormController(controller: LoginFormController, isProfileEncrypted profile: String) -> Bool {
+    func loginFormController(_ controller: LoginFormController, isProfileEncrypted profile: String) -> Bool {
         let path = ProfileManager().pathForProfileWithName(profile)
 
         let configuration = OCTManagerConfiguration.configurationWithBaseDirectory(path)!
 
-        return OCTManager.isToxSaveEncryptedAtPath(configuration.fileStorage.pathForToxSaveFile)
+        return OCTManager.isToxSaveEncrypted(atPath: configuration.fileStorage.pathForToxSaveFile)
     }
 }
 
 extension LoginCoordinator: LoginChoiceControllerDelegate {
-    func loginChoiceControllerCreateAccount(controller: LoginChoiceController) {
+    func loginChoiceControllerCreateAccount(_ controller: LoginChoiceController) {
         showCreateAccountController()
     }
 
-    func loginChoiceControllerImportProfile(controller: LoginChoiceController) {
+    func loginChoiceControllerImportProfile(_ controller: LoginChoiceController) {
         showImportProfileController()
     }
 }
 
 extension LoginCoordinator: LoginCreateAccountCoordinatorDelegate {
-    func loginCreateAccountCoordinator(coordinator: LoginCreateAccountCoordinator, 
+    func loginCreateAccountCoordinator(_ coordinator: LoginCreateAccountCoordinator, 
                                        didCreateAccountWithProfileName profileName: String,
                                        username: String,
                                        password: String) {
         createProfileWithProfileName(profileName, username: username, copyFromURL: nil, password: password)
     }
 
-    func loginCreateAccountCoordinator(coordinator: LoginCreateAccountCoordinator,
+    func loginCreateAccountCoordinator(_ coordinator: LoginCreateAccountCoordinator,
                                        didImportProfileWithProfileName profileName: String) {
-        guard let url = coordinator.userInfo[UserInfoKey.ImportURL.rawValue] as? NSURL else {
+        guard let url = coordinator.userInfo[UserInfoKey.ImportURL.rawValue] as? URL else {
             fatalError("URL should be non-nil when importing profile")
         }
 
         createProfileWithProfileName(profileName, username: nil, copyFromURL: url, password: nil)
     }
 
-    func loginCreateAccountCoordinator(coordinator: LoginCreateAccountCoordinator, didCreatePassword password: String) {
+    func loginCreateAccountCoordinator(_ coordinator: LoginCreateAccountCoordinator, didCreatePassword password: String) {
         guard let profile = coordinator.userInfo[UserInfoKey.LoginProfile.rawValue] as? String else {
             fatalError("Profile should be non-nil on login")
         }
 
-        let configurationClosure = coordinator.userInfo[UserInfoKey.LoginConfigurationClosure.rawValue] as? ((manager: OCTManager) -> Void)
-        let errorClosure = coordinator.userInfo[UserInfoKey.LoginErrorClosure.rawValue] as? (NSError -> Void)
+        let configurationClosure = coordinator.userInfo[UserInfoKey.LoginConfigurationClosure.rawValue] as? ((_ manager: OCTManager) -> Void)
+        let errorClosure = coordinator.userInfo[UserInfoKey.LoginErrorClosure.rawValue] as? ((NSError) -> Void)
 
         loginWithProfile(profile, password: password, configurationClosure: configurationClosure, errorClosure: errorClosure)
     }
@@ -161,7 +159,7 @@ private extension LoginCoordinator {
         var selectedIndex = 0
 
         if let activeProfile = UserDefaultsManager().lastActiveProfile {
-            selectedIndex = profileNames.indexOf(activeProfile) ?? 0
+            selectedIndex = profileNames.index(of: activeProfile) ?? 0
         }
 
         let controller = LoginFormController(theme: theme, profileNames: profileNames, selectedIndex: selectedIndex)
@@ -180,7 +178,7 @@ private extension LoginCoordinator {
     func showCreateAccountController() {
         let coordinator = LoginCreateAccountCoordinator(theme: theme,
                                                         navigationController: navigationController,
-                                                        type: .CreateAccountAndPassword)
+                                                        type: .createAccountAndPassword)
         coordinator.delegate = self
         coordinator.startWithOptions(nil)
 
@@ -204,15 +202,15 @@ private extension LoginCoordinator {
      * @param errorClosure Closure called if any error occured during login.
      */
     func loginWithProfile(
-            profile: String,
+            _ profile: String,
             password: String?,
-            configurationClosure: ((manager: OCTManager) -> Void)? = nil,
-            errorClosure: (NSError -> Void)? = nil)
+            configurationClosure: ((_ manager: OCTManager) -> Void)? = nil,
+            errorClosure: ((NSError) -> Void)? = nil)
     {
         guard let password = password else {
             let coordinator = LoginCreateAccountCoordinator(theme: theme,
                                                             navigationController: navigationController,
-                                                            type: .CreatePassword)
+                                                            type: .createPassword)
             coordinator.delegate = self
             coordinator.userInfo[UserInfoKey.LoginProfile.rawValue] = profile
             coordinator.userInfo[UserInfoKey.LoginConfigurationClosure.rawValue] = configurationClosure
@@ -226,13 +224,13 @@ private extension LoginCoordinator {
         let path = ProfileManager().pathForProfileWithName(profile)
         let configuration = OCTManagerConfiguration.configurationWithBaseDirectory(path)!
 
-        let hud = JGProgressHUD(style: .Dark)
-        hud.showInView(self.navigationController.view)
+        let hud = JGProgressHUD(style: .dark)!
+        hud.show(in: self.navigationController.view)
 
-        OCTManager.managerWithConfiguration(configuration, encryptPassword: password, successBlock: { [weak self] manager -> Void in
+        OCTManager.manager(with: configuration, encryptPassword: password, successBlock: { [weak self] manager -> Void in
             hud.dismiss()
 
-            configurationClosure?(manager: manager)
+            configurationClosure?(manager)
 
             let userDefaults = UserDefaultsManager()
             userDefaults.lastActiveProfile = profile
@@ -241,14 +239,14 @@ private extension LoginCoordinator {
 
         }, failureBlock: { error -> Void in
             hud.dismiss()
-            errorClosure?(error)
+            errorClosure?(error as NSError)
         })
     }
 
-    func importToxProfileFromURL(url: NSURL) {
+    func importToxProfileFromURL(_ url: URL) {
         let coordinator = LoginCreateAccountCoordinator(theme: theme,
                                                         navigationController: navigationController,
-                                                        type: .ImportProfile)
+                                                        type: .importProfile)
         coordinator.userInfo[UserInfoKey.ImportURL.rawValue] = url
         coordinator.delegate = self
         coordinator.startWithOptions(nil)
@@ -256,7 +254,7 @@ private extension LoginCoordinator {
         createAccountCoordinator = coordinator
     }
 
-    func createProfileWithProfileName(profileName: String, username: String?, copyFromURL: NSURL?, password: String?) {
+    func createProfileWithProfileName(_ profileName: String, username: String?, copyFromURL: URL?, password: String?) {
         if profileName.isEmpty {
             UIAlertController.showWithTitle("", message: String(localized: "login_enter_username_and_profile"), retryBlock: nil)
             return
@@ -280,7 +278,7 @@ private extension LoginCoordinator {
         }, errorClosure: { [unowned self] error in
             let code = OCTManagerInitError(rawValue: error.code)
 
-            if code == .CreateToxEncrypted {
+            if code == .createToxEncrypted {
                 UserDefaultsManager().lastActiveProfile = profileName
 
                 let controller = self.createFormController()
@@ -289,7 +287,7 @@ private extension LoginCoordinator {
                 self.navigationController.setViewControllers([root, controller], animated: true)
             }
             else {
-                handleErrorWithType(.CreateOCTManager, error: error)
+                handleErrorWithType(.createOCTManager, error: error)
                 _ = try? profileManager.deleteProfileWithName(profileName)
             }
         })

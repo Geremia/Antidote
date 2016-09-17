@@ -15,6 +15,6 @@ class FriendListCellModel: BaseCellModel {
     var bottomText: String = ""
     var multilineBottomtext: Bool = false
 
-    var status: UserStatus = .Offline
+    var status: UserStatus = .offline
     var hideStatus: Bool = false
 }

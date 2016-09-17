@@ -15,11 +15,11 @@ private struct Constants {
 }
 
 class AutomationCoordinator: NSObject {
-    private weak var submanagerFiles: OCTSubmanagerFiles!
+    fileprivate weak var submanagerFiles: OCTSubmanagerFiles!
 
-    private var fileMessagesToken: RLMNotificationToken?
-    private let userDefaults = UserDefaultsManager()
-    private let reachability = Reach()
+    fileprivate var fileMessagesToken: RLMNotificationToken?
+    fileprivate let userDefaults = UserDefaultsManager()
+    fileprivate let reachability = Reach()
 
     init(submanagerObjects: OCTSubmanagerObjects, submanagerFiles: OCTSubmanagerFiles) {
         self.submanagerFiles = submanagerFiles
@@ -30,9 +30,9 @@ class AutomationCoordinator: NSObject {
         let results = submanagerObjects.messages(predicate: predicate)
         fileMessagesToken = results.addNotificationBlock { [unowned self] change in
             switch change {
-                case .Initial:
+                case .initial:
                     break
-                case .Update(let results, _, let insertions, _):
+                case .update(let results, _, let insertions, _):
                     guard let results = results else {
                         break
                     }
@@ -41,7 +41,7 @@ class AutomationCoordinator: NSObject {
                         let message = results[index]
                         self.proceedNewFileMessage(message)
                     }
-                case .Error(let error):
+                case .error(let error):
                     fatalError("\(error)")
             }
         }
@@ -49,13 +49,13 @@ class AutomationCoordinator: NSObject {
 }
 
 extension AutomationCoordinator: CoordinatorProtocol {
-    func startWithOptions(options: CoordinatorOptions?) {
+    func startWithOptions(_ options: CoordinatorOptions?) {
         // nop
     }
 }
 
 private extension AutomationCoordinator {
-    func proceedNewFileMessage(message: OCTMessageAbstract) {
+    func proceedNewFileMessage(_ message: OCTMessageAbstract) {
         let usingWiFi = self.usingWiFi()
         switch userDefaults.autodownloadImages {
             case .Never:
@@ -68,7 +68,7 @@ private extension AutomationCoordinator {
                 break
         }
 
-        if !UTTypeConformsTo(message.messageFile!.fileUTI ?? "", kUTTypeImage) {
+        if !UTTypeConformsTo(message.messageFile!.fileUTI as CFString? ?? "" as CFString, kUTTypeImage) {
             // download images only
             return
         }
@@ -86,8 +86,8 @@ private extension AutomationCoordinator {
         }
 
         // workaround for deadlock in objcTox https://github.com/Antidote-for-Tox/objcTox/issues/51
-        let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(0.0 * Double(NSEC_PER_SEC)))
-        dispatch_after(delayTime, dispatch_get_main_queue()) { [weak self] in
+        let delayTime = DispatchTime.now() + Double(Int64(0.0 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
+        DispatchQueue.main.asyncAfter(deadline: delayTime) { [weak self] in
             self?.submanagerFiles.acceptFileTransfer(message, failureBlock: nil)
         }
     }
@@ -95,15 +95,15 @@ private extension AutomationCoordinator {
     func usingWiFi() -> Bool
     {
         switch reachability.connectionStatus() {
-            case .Offline:
+            case .offline:
                 return false
-            case .Unknown:
+            case .unknown:
                 return false
-            case .Online(let type):
+            case .online(let type):
                 switch type {
-                    case .WWAN:
+                    case .wwan:
                         return false
-                    case .WiFi:
+                    case .wiFi:
                         return true
                 }
         }

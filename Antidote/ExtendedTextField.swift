@@ -15,13 +15,13 @@ private struct Constants {
 }
 
 protocol ExtendedTextFieldDelegate: class {
-    func loginExtendedTextFieldReturnKeyPressed(field: ExtendedTextField)
+    func loginExtendedTextFieldReturnKeyPressed(_ field: ExtendedTextField)
 }
 
 class ExtendedTextField: UIView {
-    enum Type {
-        case Login
-        case Normal
+    enum FieldType {
+        case login
+        case normal
     }
 
     weak var delegate: ExtendedTextFieldDelegate?
@@ -66,10 +66,10 @@ class ExtendedTextField: UIView {
 
     var secureTextEntry: Bool {
         get {
-            return textField.secureTextEntry
+            return textField.isSecureTextEntry
         }
         set {
-            textField.secureTextEntry = newValue
+            textField.isSecureTextEntry = newValue
         }
     }
 
@@ -82,12 +82,12 @@ class ExtendedTextField: UIView {
         }
     }
 
-    private var titleLabel: UILabel!
-    private var textField: UITextField!
-    private var hintLabel: UILabel!
+    fileprivate var titleLabel: UILabel!
+    fileprivate var textField: UITextField!
+    fileprivate var hintLabel: UILabel!
 
-    init(theme: Theme, type: Type) {
-        super.init(frame: CGRectZero)
+    init(theme: Theme, type: FieldType) {
+        super.init(frame: CGRect.zero)
 
         createViews(theme: theme, type: type)
         installConstraints()
@@ -103,68 +103,68 @@ class ExtendedTextField: UIView {
 }
 
 extension ExtendedTextField: UITextFieldDelegate {
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         delegate?.loginExtendedTextFieldReturnKeyPressed(self)
         return false
     }
 
-    func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
-        let resultText = (textField.text! as NSString).stringByReplacingCharactersInRange(range, withString: string)
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let resultText = (textField.text! as NSString).replacingCharacters(in: range, with: string)
 
-        if resultText.lengthOfBytesUsingEncoding(NSUTF8StringEncoding) <= maxTextUTF8Length {
+        if resultText.lengthOfBytes(using: String.Encoding.utf8) <= maxTextUTF8Length {
             return true
         }
 
-        textField.text = resultText.substringToByteLength(maxTextUTF8Length, encoding: NSUTF8StringEncoding)
+        textField.text = resultText.substringToByteLength(maxTextUTF8Length, encoding: String.Encoding.utf8)
         return false
     }
 }
 
 private extension ExtendedTextField {
-    func createViews(theme theme: Theme, type: Type) {
+    func createViews(theme: Theme, type: FieldType) {
         let textColor: UIColor
 
         switch type {
-            case .Login:
+            case .login:
                 textColor = theme.colorForType(.LoginDescriptionLabel)
-            case .Normal:
+            case .normal:
                 textColor = theme.colorForType(.NormalText)
         }
 
         titleLabel = UILabel()
         titleLabel.textColor = textColor
-        titleLabel.font = UIFont.systemFontOfSize(18.0)
-        titleLabel.backgroundColor = .clearColor()
+        titleLabel.font = UIFont.systemFont(ofSize: 18.0)
+        titleLabel.backgroundColor = .clear
         addSubview(titleLabel)
 
         textField = UITextField()
         textField.delegate = self
-        textField.borderStyle = .RoundedRect
-        textField.autocapitalizationType = .Sentences
+        textField.borderStyle = .roundedRect
+        textField.autocapitalizationType = .sentences
         textField.enablesReturnKeyAutomatically = true
         addSubview(textField)
 
         hintLabel = UILabel()
         hintLabel.textColor = textColor
-        hintLabel.font = UIFont.antidoteFontWithSize(14.0, weight: .Light)
+        hintLabel.font = UIFont.antidoteFontWithSize(14.0, weight: .light)
         hintLabel.numberOfLines = 0
-        hintLabel.backgroundColor = .clearColor()
+        hintLabel.backgroundColor = .clear
         addSubview(hintLabel)
     }
 
     func installConstraints() {
-        titleLabel.snp_makeConstraints {
+        titleLabel.snp.makeConstraints {
             $0.top.leading.trailing.equalTo(self)
         }
 
-        textField.snp_makeConstraints {
-            $0.top.equalTo(titleLabel.snp_bottom).offset(Constants.VerticalOffset)
+        textField.snp.makeConstraints {
+            $0.top.equalTo(titleLabel.snp.bottom).offset(Constants.VerticalOffset)
             $0.leading.trailing.equalTo(self)
             $0.height.equalTo(Constants.TextFieldHeight)
         }
 
-        hintLabel.snp_makeConstraints {
-            $0.top.equalTo(textField.snp_bottom).offset(Constants.VerticalOffset)
+        hintLabel.snp.makeConstraints {
+            $0.top.equalTo(textField.snp.bottom).offset(Constants.VerticalOffset)
             $0.leading.trailing.equalTo(self)
             $0.bottom.equalTo(self)
         }

@@ -39,12 +39,12 @@ class LoginLogoController: LoginBaseController {
         installConstraints()
     }
 
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated:animated)
     }
 
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.setNavigationBarHidden(false, animated:animated)
     }
@@ -53,7 +53,7 @@ class LoginLogoController: LoginBaseController {
 private extension LoginLogoController {
     func createMainContainerView() {
         mainContainerView = UIView()
-        mainContainerView.backgroundColor = .clearColor()
+        mainContainerView.backgroundColor = .clear
         view.addSubview(mainContainerView)
     }
 
@@ -62,31 +62,31 @@ private extension LoginLogoController {
 
         logoImageView = UIImageView(image: image)
         logoImageView.tintColor = theme.colorForType(.LoginToxLogo)
-        logoImageView.contentMode = .ScaleAspectFit
+        logoImageView.contentMode = .scaleAspectFit
         mainContainerView.addSubview(logoImageView)
     }
 
     func createContainerView() {
         contentContainerView = UIView()
-        contentContainerView.backgroundColor = .clearColor()
+        contentContainerView.backgroundColor = .clear
         mainContainerView.addSubview(contentContainerView)
     }
 
     func installConstraints() {
-        mainContainerView.snp_makeConstraints {
+        mainContainerView.snp.makeConstraints {
             mainContainerViewTopConstraint = $0.top.equalTo(view).constraint
             $0.leading.trailing.equalTo(view)
             $0.height.equalTo(view)
         }
 
-        logoImageView.snp_makeConstraints {
+        logoImageView.snp.makeConstraints {
             $0.centerX.equalTo(mainContainerView)
-            $0.top.equalTo(mainContainerView.snp_centerY).offset(PrivateConstants.LogoTopOffset)
+            $0.top.equalTo(mainContainerView.snp.centerY).offset(PrivateConstants.LogoTopOffset)
             $0.height.equalTo(PrivateConstants.LogoHeight)
         }
 
-        contentContainerView.snp_makeConstraints {
-            $0.top.equalTo(logoImageView.snp_bottom).offset(Constants.VerticalOffset)
+        contentContainerView.snp.makeConstraints {
+            $0.top.equalTo(logoImageView.snp.bottom).offset(Constants.VerticalOffset)
             $0.bottom.equalTo(mainContainerView)
             $0.leading.trailing.equalTo(mainContainerView)
         }

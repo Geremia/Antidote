@@ -9,9 +9,9 @@
 import Foundation
 
 class IncompressibleView: UIView {
-    var customIntrinsicContentSize: CGSize = CGSizeZero
+    var customIntrinsicContentSize: CGSize = CGSize.zero
 
-    override func intrinsicContentSize() -> CGSize {
+    override var intrinsicContentSize : CGSize {
         return customIntrinsicContentSize
     }
 }

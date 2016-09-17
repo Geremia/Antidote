@@ -15,17 +15,17 @@ private struct Constants {
 }
 
 class StaticTableChatButtonsCell: StaticTableBaseCell {
-    private var chatButton: UIButton!
-    private var callButton: UIButton!
-    private var videoButton: UIButton!
+    fileprivate var chatButton: UIButton!
+    fileprivate var callButton: UIButton!
+    fileprivate var videoButton: UIButton!
 
-    private var separators: [UIView]!
+    fileprivate var separators: [UIView]!
 
-    private var chatButtonHandler: (Void -> Void)?
-    private var callButtonHandler: (Void -> Void)?
-    private var videoButtonHandler: (Void -> Void)?
+    fileprivate var chatButtonHandler: ((Void) -> Void)?
+    fileprivate var callButtonHandler: ((Void) -> Void)?
+    fileprivate var videoButtonHandler: ((Void) -> Void)?
 
-    override func setupWithTheme(theme: Theme, model: BaseCellModel) {
+    override func setupWithTheme(_ theme: Theme, model: BaseCellModel) {
         super.setupWithTheme(theme, model: model)
 
         guard let buttonsModel = model as? StaticTableChatButtonsCellModel else {
@@ -33,15 +33,15 @@ class StaticTableChatButtonsCell: StaticTableBaseCell {
             return
         }
 
-        selectionStyle = .None
+        selectionStyle = .none
 
         chatButtonHandler = buttonsModel.chatButtonHandler
         callButtonHandler = buttonsModel.callButtonHandler
         videoButtonHandler = buttonsModel.videoButtonHandler
 
-        chatButton.enabled = buttonsModel.chatButtonEnabled
-        callButton.enabled = buttonsModel.callButtonEnabled
-        videoButton.enabled = buttonsModel.videoButtonEnabled
+        chatButton.isEnabled = buttonsModel.chatButtonEnabled
+        callButton.isEnabled = buttonsModel.callButtonEnabled
+        videoButton.isEnabled = buttonsModel.videoButtonEnabled
     }
 
     override func createViews() {
@@ -54,7 +54,7 @@ class StaticTableChatButtonsCell: StaticTableBaseCell {
         separators = [UIView]()
         for _ in 0...3 {
             let sep = UIView()
-            sep.backgroundColor = UIColor.clearColor()
+            sep.backgroundColor = UIColor.clear
             customContentView.addSubview(sep)
             separators.append(sep)
         }
@@ -64,10 +64,10 @@ class StaticTableChatButtonsCell: StaticTableBaseCell {
         super.installConstraints()
 
         var previous: UIView? = nil
-        for (index, sep) in separators.enumerate() {
-            sep.snp_makeConstraints {
+        for (index, sep) in separators.enumerated() {
+            sep.snp.makeConstraints {
                 if previous != nil {
-                    $0.width.equalTo(previous!.snp_width)
+                    $0.width.equalTo(previous!.snp.width)
                 }
 
                 if index == 0 {
@@ -82,13 +82,13 @@ class StaticTableChatButtonsCell: StaticTableBaseCell {
             previous = sep
         }
 
-        func installForButton(button: UIButton, index: Int) {
-            button.snp_makeConstraints {
+        func installForButton(_ button: UIButton, index: Int) {
+            button.snp.makeConstraints {
                 $0.top.equalTo(customContentView).offset(Constants.VerticalOffset)
                 $0.bottom.equalTo(customContentView).offset(-Constants.VerticalOffset)
 
-                $0.leading.equalTo(separators[index].snp_trailing)
-                $0.trailing.equalTo(separators[index+1].snp_leading)
+                $0.leading.equalTo(separators[index].snp.trailing)
+                $0.trailing.equalTo(separators[index+1].snp.leading)
 
                 $0.size.equalTo(Constants.ButtonSize)
             }
@@ -115,12 +115,12 @@ extension StaticTableChatButtonsCell {
 }
 
 private extension StaticTableChatButtonsCell {
-    func createButtonWithImageName(imageName: String, action: Selector) -> UIButton {
+    func createButtonWithImageName(_ imageName: String, action: Selector) -> UIButton {
         let image = UIImage.templateNamed(imageName)
 
         let button = UIButton()
-        button.setImage(image, forState: .Normal)
-        button.addTarget(self, action: action, forControlEvents: .TouchUpInside)
+        button.setImage(image, for: UIControlState())
+        button.addTarget(self, action: action, for: .touchUpInside)
         customContentView.addSubview(button)
 
         return button

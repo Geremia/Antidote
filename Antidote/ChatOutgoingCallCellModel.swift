@@ -9,6 +9,6 @@
 import Foundation
 
 class ChatOutgoingCallCellModel: ChatMovableDateCellModel {
-    var callDuration: NSTimeInterval = 0
+    var callDuration: TimeInterval = 0
     var answered: Bool = true
 }

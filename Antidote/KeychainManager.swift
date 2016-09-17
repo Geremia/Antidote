@@ -32,48 +32,53 @@ class KeychainManager {
 }
 
 private extension KeychainManager {
-    func getStringForKey(key: String) -> String? {
+    func getStringForKey(_ key: String) -> String? {
         guard let data = getDataForKey(key) else {
             return nil
         }
 
-        return NSString(data: data, encoding: NSUTF8StringEncoding) as? String
+        return NSString(data: data, encoding: String.Encoding.utf8.rawValue) as? String
     }
 
-    func setString(string: String?, forKey key: String) {
-        let data = string?.dataUsingEncoding(NSUTF8StringEncoding)
+    func setString(_ string: String?, forKey key: String) {
+        let data = string?.data(using: String.Encoding.utf8)
         setData(data, forKey: key)
     }
 
-    func getBoolForKey(key: String) -> Bool? {
+    func getBoolForKey(_ key: String) -> Bool? {
         guard let data = getDataForKey(key) else {
             return nil
         }
 
-        return UnsafePointer(data.bytes).memory == 1
+        guard let firstBit = data.first else {
+            return nil
+        }
+
+        return firstBit == 1
     }
 
-    func setBool(value: Bool?, forKey key: String) {
-        var data: NSData? = nil
+    func setBool(_ value: Bool?, forKey key: String) {
+        var bytes: [UInt8] = [0]
 
         if let value = value {
-            var bytes = value ? 1 : 0
-            withUnsafePointer(&bytes) {
-                data = NSData(bytes: $0, length: sizeof(Int))
+            if value {
+                bytes = [1]
             }
         }
 
+        let data = Data(bytes: bytes)
+
         setData(data, forKey: key)
     }
 
-    func getDataForKey(key: String) -> NSData? {
+    func getDataForKey(_ key: String) -> Data? {
         var query = genericQueryWithKey(key)
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         query[kSecReturnData as String] = kCFBooleanTrue
 
         var queryResult: AnyObject?
-        let status = withUnsafeMutablePointer(&queryResult) {
-            SecItemCopyMatching(query, UnsafeMutablePointer($0))
+        let status = withUnsafeMutablePointer(to: &queryResult) {
+            SecItemCopyMatching(query as CFDictionary, UnsafeMutablePointer($0))
         }
 
         if status == errSecItemNotFound {
@@ -85,7 +90,7 @@ private extension KeychainManager {
             return nil
         }
 
-        guard let data = queryResult as? NSData else {
+        guard let data = queryResult as? Data else {
             log("Unexpected data for key \(key)")
             return nil
         }
@@ -93,54 +98,54 @@ private extension KeychainManager {
         return data
     }
 
-    func setData(newData: NSData?, forKey key: String) {
+    func setData(_ newData: Data?, forKey key: String) {
         let oldData = getDataForKey(key)
 
         switch (oldData, newData) {
-            case (.Some(_), .Some(let data)):
+            case (.some(_), .some(let data)):
                 // Update
                 let query = genericQueryWithKey(key)
 
                 var attributesToUpdate = [String : AnyObject]()
-                attributesToUpdate[kSecValueData as String] = data
+                attributesToUpdate[kSecValueData as String] = data as AnyObject?
 
-                let status = SecItemUpdate(query, attributesToUpdate)
+                let status = SecItemUpdate(query as CFDictionary, attributesToUpdate as CFDictionary)
                 guard status == noErr else {
                     log("Error when updating keychain data for key \(key), status \(status)")
                     return
                 }
 
-            case (.Some(_), .None):
+            case (.some(_), .none):
                 // Delete
                 let query = genericQueryWithKey(key)
-                let status = SecItemDelete(query)
+                let status = SecItemDelete(query as CFDictionary)
                 guard status == noErr else {
                     log("Error when updating keychain data for key \(key), status \(status)")
                     return
                 }
 
-            case (.None, .Some(let data)):
+            case (.none, .some(let data)):
                 // Add
                 var query = genericQueryWithKey(key)
-                query[kSecValueData as String] = data
+                query[kSecValueData as String] = data as AnyObject?
 
-                let status = SecItemAdd(query, nil)
+                let status = SecItemAdd(query as CFDictionary, nil)
                 guard status == noErr else {
                     log("Error when setting keychain data for key \(key), status \(status)")
                     return
                 }
 
-            case (.None, .None):
+            case (.none, .none):
                 // Nothing to do here, no changes
                 break
         }
     }
 
-    func genericQueryWithKey(key: String) -> [String : AnyObject] {
+    func genericQueryWithKey(_ key: String) -> [String : AnyObject] {
         var query = [String : AnyObject]()
         query[kSecClass as String] = kSecClassGenericPassword
-        query[kSecAttrService as String] = Constants.ActiveAccountDataService
-        query[kSecAttrAccount as String] = key
+        query[kSecAttrService as String] = Constants.ActiveAccountDataService as AnyObject?
+        query[kSecAttrAccount as String] = key as AnyObject?
         query[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
 
         return query

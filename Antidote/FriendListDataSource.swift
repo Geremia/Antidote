@@ -16,38 +16,38 @@ protocol FriendListDataSourceDelegate: class {
     func friendListDataSourceBeginUpdates()
     func friendListDataSourceEndUpdates()
 
-    func friendListDataSourceInsertRowsAtIndexPaths(indexPaths: [NSIndexPath])
-    func friendListDataSourceDeleteRowsAtIndexPaths(indexPaths: [NSIndexPath])
-    func friendListDataSourceReloadRowsAtIndexPaths(indexPaths: [NSIndexPath])
+    func friendListDataSourceInsertRowsAtIndexPaths(_ indexPaths: [IndexPath])
+    func friendListDataSourceDeleteRowsAtIndexPaths(_ indexPaths: [IndexPath])
+    func friendListDataSourceReloadRowsAtIndexPaths(_ indexPaths: [IndexPath])
 
-    func friendListDataSourceInsertSections(sections: NSIndexSet)
-    func friendListDataSourceDeleteSections(sections: NSIndexSet)
-    func friendListDataSourceReloadSections(sections: NSIndexSet)
+    func friendListDataSourceInsertSections(_ sections: IndexSet)
+    func friendListDataSourceDeleteSections(_ sections: IndexSet)
+    func friendListDataSourceReloadSections(_ sections: IndexSet)
 
     func friendListDataSourceReloadTable()
 }
 
 enum FriendListObject {
-    case Request(OCTFriendRequest)
-    case Friend(OCTFriend)
+    case request(OCTFriendRequest)
+    case friend(OCTFriend)
 }
 
 class FriendListDataSource: NSObject {
     weak var delegate: FriendListDataSourceDelegate?
 
-    private let avatarManager: AvatarManager
-    private let dateFormatter: NSDateFormatter
+    fileprivate let avatarManager: AvatarManager
+    fileprivate let dateFormatter: DateFormatter
 
-    private let requests: Results<OCTFriendRequest>?
-    private let friends: Results<OCTFriend>
+    fileprivate let requests: Results<OCTFriendRequest>?
+    fileprivate let friends: Results<OCTFriend>
 
-    private var requestsToken: RLMNotificationToken?
-    private var friendsToken: RLMNotificationToken?
+    fileprivate var requestsToken: RLMNotificationToken?
+    fileprivate var friendsToken: RLMNotificationToken?
 
     /// In case if requests is nil friend requests won't be shown.
     init(theme: Theme, friends: Results<OCTFriend>, requests: Results<OCTFriendRequest>? = nil) {
         self.avatarManager = AvatarManager(theme: theme)
-        self.dateFormatter = NSDateFormatter(type: .RelativeDateAndTime)
+        self.dateFormatter = DateFormatter(type: .relativeDateAndTime)
 
         self.requests = requests
         self.friends = friends
@@ -71,7 +71,7 @@ class FriendListDataSource: NSObject {
         return 1
     }
 
-    func numberOfRowsInSection(section: Int) -> Int {
+    func numberOfRowsInSection(_ section: Int) -> Int {
         if section == Constants.FriendRequestsSection && isRequestsSectionVisible() {
             return requests!.count
         }
@@ -80,17 +80,17 @@ class FriendListDataSource: NSObject {
         }
     }
 
-    func modelAtIndexPath(indexPath: NSIndexPath) -> FriendListCellModel {
+    func modelAtIndexPath(_ indexPath: IndexPath) -> FriendListCellModel {
         let model = FriendListCellModel()
 
         switch objectAtIndexPath(indexPath) {
-            case .Request(let request):
+            case .request(let request):
                 model.avatar = avatarManager.avatarFromString("", diameter: CGFloat(FriendListCell.Constants.AvatarSize))
                 model.topText = request.publicKey
                 model.bottomText = request.message ?? ""
                 model.multilineBottomtext = true
                 model.hideStatus = true
-            case .Friend(let friend):
+            case .friend(let friend):
                 if let data = friend.avatarData {
                     model.avatar = UIImage(data: data)
                 }
@@ -103,7 +103,7 @@ class FriendListDataSource: NSObject {
                     model.bottomText = friend.statusMessage ?? ""
                 }
                 else if let date = friend.lastSeenOnline() {
-                    model.bottomText = String(localized: "contact_last_seen", dateFormatter.stringFromDate(date))
+                    model.bottomText = String(localized: "contact_last_seen", dateFormatter.string(from: date))
                 }
 
                 model.status = UserStatus(connectionStatus: friend.connectionStatus, userStatus: friend.status)
@@ -112,12 +112,12 @@ class FriendListDataSource: NSObject {
         return model
     }
 
-    func objectAtIndexPath(indexPath: NSIndexPath) -> FriendListObject {
-        if indexPath.section == Constants.FriendRequestsSection && isRequestsSectionVisible() {
-            return .Request(requests![indexPath.row])
+    func objectAtIndexPath(_ indexPath: IndexPath) -> FriendListObject {
+        if (indexPath as NSIndexPath).section == Constants.FriendRequestsSection && isRequestsSectionVisible() {
+            return .request(requests![(indexPath as NSIndexPath).row])
         }
         else {
-            return .Friend(friends[indexPath.row])
+            return .friend(friends[(indexPath as NSIndexPath).row])
         }
     }
 
@@ -127,7 +127,7 @@ class FriendListDataSource: NSObject {
         return array
     }
 
-    func titleForHeaderInSection(section: Int) -> String? {
+    func titleForHeaderInSection(_ section: Int) -> String? {
         if !isRequestsSectionVisible() {
             return nil
         }
@@ -145,9 +145,9 @@ private extension FriendListDataSource {
     func addNotificationBlocks() {
         requestsToken = requests?.addNotificationBlock { [unowned self] change in
             switch change {
-                case .Initial:
+                case .initial:
                     break
-                case .Update(let requests, let deletions, let insertions, let modifications):
+                case .update(let requests, let deletions, let insertions, let modifications):
                     guard let requests = requests else {
                         return
                     }
@@ -164,28 +164,28 @@ private extension FriendListDataSource {
                     let countBefore = countAfter - insertions.count + deletions.count
 
                     if countBefore == 0 && countAfter > 0 {
-                        self.delegate?.friendListDataSourceInsertSections(NSIndexSet(index: 0))
+                        self.delegate?.friendListDataSourceInsertSections(IndexSet(integer: 0))
                     }
                     else if countBefore > 0 && countAfter == 0 {
-                        self.delegate?.friendListDataSourceDeleteSections(NSIndexSet(index: 0))
+                        self.delegate?.friendListDataSourceDeleteSections(IndexSet(integer: 0))
                     }
                     else {
-                        self.delegate?.friendListDataSourceDeleteRowsAtIndexPaths(deletions.map { NSIndexPath(forRow: $0, inSection: 0)} )
-                        self.delegate?.friendListDataSourceInsertRowsAtIndexPaths(insertions.map { NSIndexPath(forRow: $0, inSection: 0)} )
-                        self.delegate?.friendListDataSourceReloadRowsAtIndexPaths(modifications.map { NSIndexPath(forRow: $0, inSection: 0)} )
+                        self.delegate?.friendListDataSourceDeleteRowsAtIndexPaths(deletions.map { IndexPath(row: $0, section: 0)} )
+                        self.delegate?.friendListDataSourceInsertRowsAtIndexPaths(insertions.map { IndexPath(row: $0, section: 0)} )
+                        self.delegate?.friendListDataSourceReloadRowsAtIndexPaths(modifications.map { IndexPath(row: $0, section: 0)} )
                     }
 
                     self.delegate?.friendListDataSourceEndUpdates()
-                case .Error(let error):
+                case .error(let error):
                     fatalError("\(error)")
             }
         }
 
         friendsToken = friends.addNotificationBlock { [unowned self] change in
             switch change {
-                case .Initial:
+                case .initial:
                     break
-                case .Update(_, let deletions, let insertions, let modifications):
+                case .update(_, let deletions, let insertions, let modifications):
                     if insertions.count > 0 {
                         // reloading data on request removal/friend insertion to synchronize requests/friends
                         self.delegate?.friendListDataSourceReloadTable()
@@ -194,16 +194,16 @@ private extension FriendListDataSource {
 
                     let section = self.isRequestsSectionVisible() ? 1 : 0
 
-                    let deletions = deletions.map { NSIndexPath(forRow: $0, inSection: section) }
-                    let insertions = insertions.map { NSIndexPath(forRow: $0, inSection: section) }
-                    let modifications = modifications.map { NSIndexPath(forRow: $0, inSection: section) }
+                    let deletions = deletions.map { IndexPath(row: $0, section: section) }
+                    let insertions = insertions.map { IndexPath(row: $0, section: section) }
+                    let modifications = modifications.map { IndexPath(row: $0, section: section) }
 
                     self.delegate?.friendListDataSourceBeginUpdates()
                     self.delegate?.friendListDataSourceDeleteRowsAtIndexPaths(deletions)
                     self.delegate?.friendListDataSourceInsertRowsAtIndexPaths(insertions)
                     self.delegate?.friendListDataSourceReloadRowsAtIndexPaths(modifications)
                     self.delegate?.friendListDataSourceEndUpdates()
-                case .Error(let error):
+                case .error(let error):
                     fatalError("\(error)")
             }
         }

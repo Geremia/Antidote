@@ -9,15 +9,15 @@
 import UIKit
 
 class AppCoordinator {
-    private let window: UIWindow
-    private var activeCoordinator: TopCoordinatorProtocol!
-    private var theme: Theme
+    fileprivate let window: UIWindow
+    fileprivate var activeCoordinator: TopCoordinatorProtocol!
+    fileprivate var theme: Theme
 
     init(window: UIWindow) {
         self.window = window
 
-        let filepath = NSBundle.mainBundle().pathForResource("default-theme", ofType: "yaml")!
-        let yamlString = try! NSString(contentsOfFile:filepath, encoding:NSUTF8StringEncoding) as String
+        let filepath = Bundle.main.path(forResource: "default-theme", ofType: "yaml")!
+        let yamlString = try! NSString(contentsOfFile:filepath, encoding:String.Encoding.utf8.rawValue) as String
 
         theme = try! Theme(yamlString: yamlString)
         applyTheme(theme)
@@ -26,24 +26,24 @@ class AppCoordinator {
 
 // MARK: CoordinatorProtocol
 extension AppCoordinator: TopCoordinatorProtocol {
-    func startWithOptions(options: CoordinatorOptions?) {
-        let storyboard = UIStoryboard(name: "LaunchPlaceholderBoard", bundle: NSBundle.mainBundle())
-        window.rootViewController = storyboard.instantiateViewControllerWithIdentifier("LaunchPlaceholderController")
+    func startWithOptions(_ options: CoordinatorOptions?) {
+        let storyboard = UIStoryboard(name: "LaunchPlaceholderBoard", bundle: Bundle.main)
+        window.rootViewController = storyboard.instantiateViewController(withIdentifier: "LaunchPlaceholderController")
 
         recreateActiveCoordinator(options: options)
     }
 
-    func handleLocalNotification(notification: UILocalNotification) {
+    func handleLocalNotification(_ notification: UILocalNotification) {
         activeCoordinator.handleLocalNotification(notification)
     }
 
-    func handleInboxURL(url: NSURL) {
+    func handleInboxURL(_ url: URL) {
         activeCoordinator.handleInboxURL(url)
     }
 }
 
 extension AppCoordinator: RunningCoordinatorDelegate {
-    func runningCoordinatorDidLogout(coordinator: RunningCoordinator, importToxProfileFromURL: NSURL?) {
+    func runningCoordinatorDidLogout(_ coordinator: RunningCoordinator, importToxProfileFromURL: URL?) {
         KeychainManager().deleteActiveAccountData()
 
         recreateActiveCoordinator()
@@ -54,7 +54,7 @@ extension AppCoordinator: RunningCoordinatorDelegate {
         }
     }
 
-    func runningCoordinatorDeleteProfile(coordinator: RunningCoordinator) {
+    func runningCoordinatorDeleteProfile(_ coordinator: RunningCoordinator) {
         let userDefaults = UserDefaultsManager()
         let profileManager = ProfileManager()
 
@@ -69,17 +69,17 @@ extension AppCoordinator: RunningCoordinatorDelegate {
             recreateActiveCoordinator()
         }
         catch let error as NSError {
-            handleErrorWithType(.DeleteProfile, error: error)
+            handleErrorWithType(.deleteProfile, error: error)
         }
     }
 
-    func runningCoordinatorRecreateCoordinatorsStack(coordinator: RunningCoordinator, options: CoordinatorOptions) {
+    func runningCoordinatorRecreateCoordinatorsStack(_ coordinator: RunningCoordinator, options: CoordinatorOptions) {
         recreateActiveCoordinator(options: options, skipAuthorizationChallenge: true)
     }
 }
 
 extension AppCoordinator: LoginCoordinatorDelegate {
-    func loginCoordinatorDidLogin(coordinator: LoginCoordinator, manager: OCTManager, password: String) {
+    func loginCoordinatorDidLogin(_ coordinator: LoginCoordinator, manager: OCTManager, password: String) {
         KeychainManager().toxPasswordForActiveAccount = password
 
         recreateActiveCoordinator(manager: manager, skipAuthorizationChallenge: true)
@@ -88,7 +88,7 @@ extension AppCoordinator: LoginCoordinatorDelegate {
 
 // MARK: Private
 private extension AppCoordinator {
-    func applyTheme(theme: Theme) {
+    func applyTheme(_ theme: Theme) {
         let linkTextColor = theme.colorForType(.LinkText)
 
         UIButton.appearance().tintColor = linkTextColor
@@ -96,11 +96,11 @@ private extension AppCoordinator {
         UINavigationBar.appearance().tintColor = linkTextColor
     }
 
-    func recreateActiveCoordinator(options options: CoordinatorOptions? = nil,
+    func recreateActiveCoordinator(options: CoordinatorOptions? = nil,
                                    manager: OCTManager? = nil,
                                    skipAuthorizationChallenge: Bool = false) {
         if let password = KeychainManager().toxPasswordForActiveAccount {
-            let successBlock: OCTManager -> Void = { [unowned self] manager -> Void in
+            let successBlock: (OCTManager) -> Void = { [unowned self] manager -> Void in
                 self.activeCoordinator = self.createRunningCoordinatorWithManager(manager,
                                                                                   options: options,
                                                                                   skipAuthorizationChallenge: skipAuthorizationChallenge)
@@ -114,7 +114,7 @@ private extension AppCoordinator {
                 let path = ProfileManager().pathForProfileWithName(profileName)
                 let configuration = OCTManagerConfiguration.configurationWithBaseDirectory(path)!
 
-                OCTManager.managerWithConfiguration(configuration,
+                OCTManager.manager(with: configuration,
                                                     encryptPassword: password,
                                                     successBlock: successBlock,
                                                     failureBlock: { [unowned self] _ in
@@ -131,7 +131,7 @@ private extension AppCoordinator {
         }
     }
 
-    func createRunningCoordinatorWithManager(manager: OCTManager,
+    func createRunningCoordinatorWithManager(_ manager: OCTManager,
                                              options: CoordinatorOptions?,
                                              skipAuthorizationChallenge: Bool) -> RunningCoordinator {
         let coordinator = RunningCoordinator(theme: theme,
@@ -144,7 +144,7 @@ private extension AppCoordinator {
         return coordinator
     }
 
-    func createLoginCoordinator(options: CoordinatorOptions?) -> LoginCoordinator {
+    func createLoginCoordinator(_ options: CoordinatorOptions?) -> LoginCoordinator {
         let coordinator = LoginCoordinator(theme: theme, window: window)
         coordinator.delegate = self
         coordinator.startWithOptions(options)

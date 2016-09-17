@@ -10,12 +10,12 @@ import UIKit
 import SnapKit
 
 class StaticTableController: UIViewController {
-    private let theme: Theme
-    private let tableViewStyle: UITableViewStyle
-    private var modelArray: [[StaticTableBaseCellModel]]
-    private let footerArray: [String?]?
+    fileprivate let theme: Theme
+    fileprivate let tableViewStyle: UITableViewStyle
+    fileprivate var modelArray: [[StaticTableBaseCellModel]]
+    fileprivate let footerArray: [String?]?
 
-    private var tableView: UITableView?
+    fileprivate var tableView: UITableView?
 
     init(theme: Theme, style: UITableViewStyle, model: [[StaticTableBaseCellModel]], footers: [String?]? = nil) {
         self.theme = theme
@@ -25,7 +25,7 @@ class StaticTableController: UIViewController {
 
         super.init(nibName: nil, bundle: nil)
 
-        edgesForExtendedLayout = .None
+        edgesForExtendedLayout = UIRectEdge()
     }
 
     required convenience init?(coder aDecoder: NSCoder) {
@@ -44,15 +44,15 @@ class StaticTableController: UIViewController {
         tableView?.reloadData()
     }
 
-    func updateModelArray(model: [[StaticTableBaseCellModel]]) {
+    func updateModelArray(_ model: [[StaticTableBaseCellModel]]) {
         modelArray = model
         reloadTableView()
     }
 }
 
 extension StaticTableController: UITableViewDataSource {
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let model = modelArray[indexPath.section][indexPath.row]
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let model = modelArray[(indexPath as NSIndexPath).section][(indexPath as NSIndexPath).row]
         let cell: StaticTableBaseCell
 
         switch model {
@@ -76,13 +76,13 @@ extension StaticTableController: UITableViewDataSource {
 
         cell.setupWithTheme(theme, model: model)
 
-        let isLastRow = (indexPath.row == (modelArray[indexPath.section].count - 1))
-        let isLastSection = (indexPath.section == (modelArray.count - 1))
+        let isLastRow = ((indexPath as NSIndexPath).row == (modelArray[(indexPath as NSIndexPath).section].count - 1))
+        let isLastSection = ((indexPath as NSIndexPath).section == (modelArray.count - 1))
 
         switch tableViewStyle {
-            case .Plain:
+            case .plain:
                 cell.setBottomSeparatorHidden(!isLastRow || isLastSection)
-            case .Grouped:
+            case .grouped:
                 cell.setBottomSeparatorHidden(isLastRow)
 
         }
@@ -90,15 +90,15 @@ extension StaticTableController: UITableViewDataSource {
         return cell
     }
 
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return modelArray.count
     }
 
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return modelArray[section].count
     }
 
-    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+    func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         guard let array = footerArray else {
             return nil
         }
@@ -112,14 +112,14 @@ extension StaticTableController: UITableViewDataSource {
 }
 
 extension StaticTableController: UITableViewDelegate {
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
 
-        guard let cell = tableView.cellForRowAtIndexPath(indexPath) as? StaticTableBaseCell else {
+        guard let cell = tableView.cellForRow(at: indexPath) as? StaticTableBaseCell else {
             return
         }
 
-        let model = modelArray[indexPath.section][indexPath.row]
+        let model = modelArray[(indexPath as NSIndexPath).section][(indexPath as NSIndexPath).row]
 
         switch model {
             case let model as StaticTableSelectableCellModel:
@@ -133,37 +133,37 @@ extension StaticTableController: UITableViewDelegate {
 
 private extension StaticTableController {
     func createTableView() {
-        tableView = UITableView(frame: CGRectZero, style: tableViewStyle)
+        tableView = UITableView(frame: CGRect.zero, style: tableViewStyle)
         tableView!.dataSource = self
         tableView!.delegate = self
         tableView!.estimatedRowHeight = 44.0;
-        tableView!.separatorStyle = .None;
+        tableView!.separatorStyle = .none;
 
         switch tableViewStyle {
-            case .Plain:
+            case .plain:
                 tableView!.backgroundColor = theme.colorForType(.NormalBackground)
-            case .Grouped:
+            case .grouped:
                 tableView!.backgroundColor = theme.colorForType(.SettingsBackground)
         }
 
         view.addSubview(tableView!)
 
-        tableView!.registerClass(StaticTableButtonCell.self, forCellReuseIdentifier: StaticTableButtonCell.staticReuseIdentifier)
-        tableView!.registerClass(StaticTableAvatarCell.self, forCellReuseIdentifier: StaticTableAvatarCell.staticReuseIdentifier)
-        tableView!.registerClass(StaticTableDefaultCell.self, forCellReuseIdentifier: StaticTableDefaultCell.staticReuseIdentifier)
-        tableView!.registerClass(StaticTableChatButtonsCell.self, forCellReuseIdentifier: StaticTableChatButtonsCell.staticReuseIdentifier)
-        tableView!.registerClass(StaticTableSwitchCell.self, forCellReuseIdentifier: StaticTableSwitchCell.staticReuseIdentifier)
-        tableView!.registerClass(StaticTableInfoCell.self, forCellReuseIdentifier: StaticTableInfoCell.staticReuseIdentifier)
-        tableView!.registerClass(StaticTableMultiChoiceButtonCell.self, forCellReuseIdentifier: StaticTableMultiChoiceButtonCell.staticReuseIdentifier)
+        tableView!.register(StaticTableButtonCell.self, forCellReuseIdentifier: StaticTableButtonCell.staticReuseIdentifier)
+        tableView!.register(StaticTableAvatarCell.self, forCellReuseIdentifier: StaticTableAvatarCell.staticReuseIdentifier)
+        tableView!.register(StaticTableDefaultCell.self, forCellReuseIdentifier: StaticTableDefaultCell.staticReuseIdentifier)
+        tableView!.register(StaticTableChatButtonsCell.self, forCellReuseIdentifier: StaticTableChatButtonsCell.staticReuseIdentifier)
+        tableView!.register(StaticTableSwitchCell.self, forCellReuseIdentifier: StaticTableSwitchCell.staticReuseIdentifier)
+        tableView!.register(StaticTableInfoCell.self, forCellReuseIdentifier: StaticTableInfoCell.staticReuseIdentifier)
+        tableView!.register(StaticTableMultiChoiceButtonCell.self, forCellReuseIdentifier: StaticTableMultiChoiceButtonCell.staticReuseIdentifier)
     }
 
     func installConstraints() {
-        tableView!.snp_makeConstraints {
+        tableView!.snp.makeConstraints {
             $0.edges.equalTo(view)
         }
     }
 
-    func dequeueCellForClass(identifier: String) -> StaticTableBaseCell {
-        return tableView!.dequeueReusableCellWithIdentifier(identifier) as! StaticTableBaseCell
+    func dequeueCellForClass(_ identifier: String) -> StaticTableBaseCell {
+        return tableView!.dequeueReusableCell(withIdentifier: identifier) as! StaticTableBaseCell
     }
 }

@@ -9,23 +9,23 @@
 import Foundation
 
 protocol SettingsAdvancedControllerDelegate: class {
-    func settingsAdvancedControllerToxOptionsChanged(controller: SettingsAdvancedController)
+    func settingsAdvancedControllerToxOptionsChanged(_ controller: SettingsAdvancedController)
 }
 
 class SettingsAdvancedController: StaticTableController {
     weak var delegate: SettingsAdvancedControllerDelegate?
 
-    private let theme: Theme
-    private let userDefaults = UserDefaultsManager()
+    fileprivate let theme: Theme
+    fileprivate let userDefaults = UserDefaultsManager()
 
-    private let IPv6Model = StaticTableSwitchCellModel()
-    private let UDPModel = StaticTableSwitchCellModel()
-    private let restoreDefaultsModel = StaticTableButtonCellModel()
+    fileprivate let IPv6Model = StaticTableSwitchCellModel()
+    fileprivate let UDPModel = StaticTableSwitchCellModel()
+    fileprivate let restoreDefaultsModel = StaticTableButtonCellModel()
 
     init(theme: Theme) {
         self.theme = theme
 
-        super.init(theme: theme, style: .Grouped, model: [
+        super.init(theme: theme, style: .grouped, model: [
             [
                 IPv6Model,
                 UDPModel,
@@ -58,12 +58,12 @@ private extension SettingsAdvancedController {
         restoreDefaultsModel.didSelectHandler = restoreDefaultsSettings
     }
 
-    func IPv6Changed(on: Bool) {
+    func IPv6Changed(_ on: Bool) {
         userDefaults.IPv6Enabled = on
         delegate?.settingsAdvancedControllerToxOptionsChanged(self)
     }
 
-    func UDPChanged(on: Bool) {
+    func UDPChanged(_ on: Bool) {
         userDefaults.UDPEnabled = on
         delegate?.settingsAdvancedControllerToxOptionsChanged(self)
     }

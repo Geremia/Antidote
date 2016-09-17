@@ -15,7 +15,7 @@ class ChatListCellModel: BaseCellModel {
     var message: String = ""
     var dateText: String = ""
 
-    var status: UserStatus = .Offline
+    var status: UserStatus = .offline
 
     var isUnread: Bool = false
 }

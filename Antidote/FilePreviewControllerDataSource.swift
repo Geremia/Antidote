@@ -10,10 +10,10 @@ import Foundation
 import QuickLook
 
 private class FilePreviewItem: NSObject, QLPreviewItem {
-    @objc var previewItemURL: NSURL
-    @objc var previewItemTitle: String?
+    var previewItemURL: URL?
+    var previewItemTitle: String?
 
-    init(url: NSURL, title: String?) {
+    init(url: URL, title: String?) {
         self.previewItemURL = url
             self.previewItemTitle = title
     }
@@ -30,8 +30,8 @@ class FilePreviewControllerDataSource: NSObject , QuickLookPreviewControllerData
             NSPredicate(format: "chatUniqueIdentifier == %@ AND messageFile != nil", chat.uniqueIdentifier),
 
             NSCompoundPredicate(orPredicateWithSubpredicates: [
-                NSPredicate(format: "messageFile.fileType == \(OCTMessageFileType.Ready.rawValue)"),
-                NSPredicate(format: "senderUniqueIdentifier == nil AND messageFile.fileType == \(OCTMessageFileType.Canceled.rawValue)"),
+                NSPredicate(format: "messageFile.fileType == \(OCTMessageFileType.ready.rawValue)"),
+                NSPredicate(format: "senderUniqueIdentifier == nil AND messageFile.fileType == \(OCTMessageFileType.canceled.rawValue)"),
             ]),
         ])
 
@@ -41,11 +41,11 @@ class FilePreviewControllerDataSource: NSObject , QuickLookPreviewControllerData
 
         messagesToken = messages.addNotificationBlock { [unowned self] change in
             switch change {
-                case .Initial:
+                case .initial:
                     break
-                case .Update:
+                case .update:
                     self.previewController?.reloadData()
-                case .Error(let error):
+                case .error(let error):
                 fatalError("\(error)")
             }
         }
@@ -55,20 +55,20 @@ class FilePreviewControllerDataSource: NSObject , QuickLookPreviewControllerData
         messagesToken?.stop()
     }
 
-    func indexOfMessage(message: OCTMessageAbstract) -> Int? {
+    func indexOfMessage(_ message: OCTMessageAbstract) -> Int? {
         return messages.indexOfObject(message)
     }
 }
 
 extension FilePreviewControllerDataSource: QLPreviewControllerDataSource {
-    func numberOfPreviewItemsInPreviewController(controller: QLPreviewController) -> Int {
+    func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
         return messages.count
     }
 
-    func previewController(controller: QLPreviewController, previewItemAtIndex index: Int) -> QLPreviewItem {
+    func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
         let message = messages[index]
 
-        let url = NSURL.fileURLWithPath(message.messageFile!.filePath()!)
+        let url = URL(fileURLWithPath: message.messageFile!.filePath()!)
 
         return FilePreviewItem(url: url, title: message.messageFile!.fileName)
     }

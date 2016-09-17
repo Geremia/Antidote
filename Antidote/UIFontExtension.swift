@@ -10,15 +10,15 @@ import UIKit
 
 extension UIFont {
     enum Weight {
-        case Light
-        case Bold
+        case light
+        case bold
 
         func float() -> CGFloat {
             if #available(iOS 8.2, *) {
                 switch self {
-                    case .Light:
+                    case .light:
                         return UIFontWeightLight
-                    case .Bold:
+                    case .bold:
                         return UIFontWeightBold
                 }
             }
@@ -28,17 +28,17 @@ extension UIFont {
 
         func name() -> String {
             switch self {
-                case .Light:
+                case .light:
                     return "HelveticaNeue-Light"
-                case .Bold:
+                case .bold:
                     return "HelveticaNeue-Bold"
             }
         }
     }
 
-    class func antidoteFontWithSize(size: CGFloat, weight: Weight) -> UIFont {
+    class func antidoteFontWithSize(_ size: CGFloat, weight: Weight) -> UIFont {
         if #available(iOS 8.2, *) {
-            return UIFont.systemFontOfSize(size, weight: weight.float())
+            return UIFont.systemFont(ofSize: size, weight: weight.float())
         } else {
             return UIFont(name: weight.name(), size: size)!
         }

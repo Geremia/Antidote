@@ -19,7 +19,7 @@ class StaticBackgroundView: UIView {
         set {}
     }
 
-    func setStaticBackgroundColor(color: UIColor?) {
+    func setStaticBackgroundColor(_ color: UIColor?) {
         super.backgroundColor = color
     }
 }

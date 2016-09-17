@@ -10,27 +10,27 @@ import Foundation
 import MessageUI
 
 protocol SettingsMainControllerDelegate: class {
-    func settingsMainControllerShowAboutScreen(controller: SettingsMainController)
-    func settingsMainControllerShowAdvancedSettings(controller: SettingsMainController)
-    func settingsMainControllerChangeAutodownloadImages(controller: SettingsMainController)
+    func settingsMainControllerShowAboutScreen(_ controller: SettingsMainController)
+    func settingsMainControllerShowAdvancedSettings(_ controller: SettingsMainController)
+    func settingsMainControllerChangeAutodownloadImages(_ controller: SettingsMainController)
 }
 
 class SettingsMainController: StaticTableController {
     weak var delegate: SettingsMainControllerDelegate?
 
-    private let theme: Theme
-    private let userDefaults = UserDefaultsManager()
+    fileprivate let theme: Theme
+    fileprivate let userDefaults = UserDefaultsManager()
 
-    private let aboutModel = StaticTableDefaultCellModel()
-    private let autodownloadImagesModel = StaticTableInfoCellModel()
-    private let notificationsModel = StaticTableSwitchCellModel()
-    private let advancedSettingsModel = StaticTableDefaultCellModel()
-    private let feedbackModel = StaticTableButtonCellModel()
+    fileprivate let aboutModel = StaticTableDefaultCellModel()
+    fileprivate let autodownloadImagesModel = StaticTableInfoCellModel()
+    fileprivate let notificationsModel = StaticTableSwitchCellModel()
+    fileprivate let advancedSettingsModel = StaticTableDefaultCellModel()
+    fileprivate let feedbackModel = StaticTableButtonCellModel()
 
     init(theme: Theme) {
         self.theme = theme
 
-        super.init(theme: theme, style: .Grouped, model: [
+        super.init(theme: theme, style: .grouped, model: [
             [
                 aboutModel,
             ],
@@ -62,7 +62,7 @@ class SettingsMainController: StaticTableController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
         updateModels()
@@ -71,8 +71,8 @@ class SettingsMainController: StaticTableController {
 }
 
 extension SettingsMainController: MFMailComposeViewControllerDelegate {
-    func mailComposeController(controller: MFMailComposeViewController, didFinishWithResult result: MFMailComposeResult, error: NSError?) {
-        dismissViewControllerAnimated(true, completion: nil)
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        dismiss(animated: true, completion: nil)
     }
 }
 
@@ -80,7 +80,7 @@ private extension SettingsMainController{
     func updateModels() {
         aboutModel.value = String(localized: "settings_about")
         aboutModel.didSelectHandler = showAboutScreen
-        aboutModel.rightImageType = .Arrow
+        aboutModel.rightImageType = .arrow
 
         autodownloadImagesModel.title = String(localized: "settings_autodownload_images")
         autodownloadImagesModel.showArrow = true
@@ -100,7 +100,7 @@ private extension SettingsMainController{
 
         advancedSettingsModel.value = String(localized: "settings_advanced_settings")
         advancedSettingsModel.didSelectHandler = showAdvancedSettings
-        advancedSettingsModel.rightImageType = .Arrow
+        advancedSettingsModel.rightImageType = .arrow
 
         feedbackModel.title = String(localized: "settings_feedback")
         feedbackModel.didSelectHandler = feedback
@@ -110,7 +110,7 @@ private extension SettingsMainController{
         delegate?.settingsMainControllerShowAboutScreen(self)
     }
 
-    func notificationsValueChanged(on: Bool) {
+    func notificationsValueChanged(_ on: Bool) {
         userDefaults.showNotificationPreview = on
     }
 
@@ -134,6 +134,6 @@ private extension SettingsMainController{
         controller.setToRecipients(["feedback@antidote.im"])
         controller.mailComposeDelegate = self
 
-        presentViewController(controller, animated: true, completion: nil)
+        present(controller, animated: true, completion: nil)
     }
 }

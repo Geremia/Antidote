@@ -15,19 +15,19 @@ private struct Constants {
 }
 
 class NotificationWindow: UIWindow {
-    private let theme: Theme
+    fileprivate let theme: Theme
 
-    private var connectingView: UIView!
-    private var connectingViewTopConstraint: Constraint!
+    fileprivate var connectingView: UIView!
+    fileprivate var connectingViewTopConstraint: Constraint!
 
     init(theme: Theme) {
         self.theme = theme
 
-        super.init(frame: UIScreen.mainScreen().bounds)
+        super.init(frame: UIScreen.main.bounds)
 
         windowLevel = UIWindowLevelStatusBar + 1
         makeKeyAndVisible()
-        backgroundColor = .clearColor()
+        backgroundColor = .clear
 
         createRootViewController()
         createConnectingView()
@@ -37,11 +37,11 @@ class NotificationWindow: UIWindow {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func pointInside(point: CGPoint, withEvent event: UIEvent?) -> Bool {
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
         for subview in subviews {
-            let converted = convertPoint(point, toView: subview)
+            let converted = convert(point, to: subview)
 
-            if subview.hitTest(converted, withEvent: event) != nil {
+            if subview.hitTest(converted, with: event) != nil {
                 return true
             }
         }
@@ -49,13 +49,13 @@ class NotificationWindow: UIWindow {
         return false
     }
 
-    func showConnectingView(show: Bool, animated: Bool) {
+    func showConnectingView(_ show: Bool, animated: Bool) {
         let showPreparation = {
-            self.connectingView.hidden = false
+            self.connectingView.isHidden = false
         }
 
         let showBlock = {
-            self.connectingViewTopConstraint.updateOffset(0.0)
+            self.connectingViewTopConstraint.update(offset: 0.0)
             self.layoutIfNeeded()
         }
 
@@ -64,18 +64,18 @@ class NotificationWindow: UIWindow {
         let hidePreparation = {}
 
         let hideBlock = {
-            self.connectingViewTopConstraint.updateOffset(-self.connectingView.frame.size.height)
+            self.connectingViewTopConstraint.update(offset: -self.connectingView.frame.size.height)
             self.layoutIfNeeded()
         }
 
         let hideCompletion = {
-            self.connectingView.hidden = true
+            self.connectingView.isHidden = true
         }
 
         show ? showPreparation() : hidePreparation()
 
         if animated {
-            UIView.animateWithDuration(Constants.AnimationDuration, animations: {
+            UIView.animate(withDuration: Constants.AnimationDuration, animations: {
                 show ? showBlock() : hideBlock()
             }, completion: { finished in
                 show ? showCompletion() : hideCompletion()
@@ -92,7 +92,7 @@ private extension NotificationWindow {
     func createRootViewController() {
         rootViewController = UIViewController()
         rootViewController!.view = ViewPassingGestures()
-        rootViewController!.view.backgroundColor = .clearColor()
+        rootViewController!.view.backgroundColor = .clear
     }
 
     func createConnectingView() {
@@ -102,24 +102,24 @@ private extension NotificationWindow {
 
         let label = UILabel()
         label.textColor = theme.colorForType(.ConnectingText)
-        label.backgroundColor = .clearColor()
+        label.backgroundColor = .clear
         label.text = String(localized: "connecting_label")
-        label.textAlignment = .Center
-        label.font = UIFont.antidoteFontWithSize(12.0, weight: .Light)
+        label.textAlignment = .center
+        label.font = UIFont.antidoteFontWithSize(12.0, weight: .light)
         connectingView!.addSubview(label)
 
         label.alpha = 0.0
-        UIView.animateWithDuration(Constants.ConnectingBlinkPeriod, delay: 0.0, options: [.Repeat, .Autoreverse], animations: {
+        UIView.animate(withDuration: Constants.ConnectingBlinkPeriod, delay: 0.0, options: [.repeat, .autoreverse], animations: {
             label.alpha = 1.0
         }, completion: nil)
 
-        connectingView!.snp_makeConstraints {
+        connectingView!.snp.makeConstraints {
             connectingViewTopConstraint = $0.top.equalTo(self).constraint
             $0.leading.trailing.equalTo(self)
-            $0.height.equalTo(UIApplication.sharedApplication().statusBarFrame.size.height)
+            $0.height.equalTo(UIApplication.shared.statusBarFrame.size.height)
         }
 
-        label.snp_makeConstraints {
+        label.snp.makeConstraints {
             $0.edges.equalTo(connectingView!)
         }
     }

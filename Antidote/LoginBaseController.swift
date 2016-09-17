@@ -26,7 +26,7 @@ class LoginBaseController: KeyboardNotificationController {
 
         super.init()
 
-        edgesForExtendedLayout = .None
+        edgesForExtendedLayout = UIRectEdge()
     }
 
     required convenience init?(coder aDecoder: NSCoder) {

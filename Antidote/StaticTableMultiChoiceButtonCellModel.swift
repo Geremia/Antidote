@@ -10,8 +10,8 @@ import Foundation
 
 class StaticTableMultiChoiceButtonCellModel: StaticTableBaseCellModel {
     enum ButtonStyle {
-        case Negative
-        case Positive
+        case negative
+        case positive
     }
 
     struct ButtonModel {

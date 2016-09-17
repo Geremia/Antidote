@@ -10,12 +10,12 @@ import UIKit
 import SnapKit
 
 class StaticTableSwitchCell: StaticTableBaseCell {
-    private var valueChangedHandler: (Bool -> Void)?
+    fileprivate var valueChangedHandler: ((Bool) -> Void)?
 
-    private var titleLabel: UILabel!
-    private var switchView: UISwitch!
+    fileprivate var titleLabel: UILabel!
+    fileprivate var switchView: UISwitch!
 
-    override func setupWithTheme(theme: Theme, model: BaseCellModel) {
+    override func setupWithTheme(_ theme: Theme, model: BaseCellModel) {
         super.setupWithTheme(theme, model: model)
 
         guard let switchModel = model as? StaticTableSwitchCellModel else {
@@ -23,14 +23,14 @@ class StaticTableSwitchCell: StaticTableBaseCell {
             return
         }
 
-        selectionStyle = .None
+        selectionStyle = .none
 
         titleLabel.textColor = theme.colorForType(.NormalText)
         titleLabel.text = switchModel.title
 
-        switchView.enabled = switchModel.enabled
+        switchView.isEnabled = switchModel.enabled
         switchView.tintColor = theme.colorForType(.LinkText)
-        switchView.on = switchModel.on
+        switchView.isOn = switchModel.on
 
         valueChangedHandler = switchModel.valueChangedHandler
     }
@@ -39,25 +39,25 @@ class StaticTableSwitchCell: StaticTableBaseCell {
         super.createViews()
 
         titleLabel = UILabel()
-        titleLabel.backgroundColor = UIColor.clearColor()
+        titleLabel.backgroundColor = UIColor.clear
         customContentView.addSubview(titleLabel)
 
         switchView = UISwitch()
-        switchView.addTarget(self, action: #selector(StaticTableSwitchCell.switchValueChanged), forControlEvents: .ValueChanged)
+        switchView.addTarget(self, action: #selector(StaticTableSwitchCell.switchValueChanged), for: .valueChanged)
         customContentView.addSubview(switchView)
     }
 
     override func installConstraints() {
         super.installConstraints()
 
-        titleLabel.snp_makeConstraints {
+        titleLabel.snp.makeConstraints {
             $0.centerY.equalTo(customContentView)
             $0.leading.equalTo(customContentView)
         }
 
-        switchView.snp_makeConstraints {
+        switchView.snp.makeConstraints {
             $0.centerY.equalTo(customContentView)
-            $0.leading.greaterThanOrEqualTo(titleLabel.snp_trailing)
+            $0.leading.greaterThanOrEqualTo(titleLabel.snp.trailing)
             $0.trailing.equalTo(customContentView)
         }
     }
@@ -65,6 +65,6 @@ class StaticTableSwitchCell: StaticTableBaseCell {
 
 extension StaticTableSwitchCell {
     func switchValueChanged() {
-        valueChangedHandler?(switchView.on)
+        valueChangedHandler?(switchView.isOn)
     }
 }

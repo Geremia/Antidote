@@ -9,22 +9,22 @@
 import UIKit
 import Yaml
 
-enum ErrorTheme: ErrorType {
-    case CannotParseFile(String)
-    case WrongVersion(String)
+enum ErrorTheme: Error {
+    case cannotParseFile(String)
+    case wrongVersion(String)
 
     func debugDescription() -> String {
         switch self {
-            case .CannotParseFile(let string):
+            case .cannotParseFile(let string):
                 return "Parse error: \(string)"
-            case .WrongVersion(let string):
+            case .wrongVersion(let string):
                 return "Version error: \(string)"
         }
     }
 }
 
 class Theme {
-    enum Type: String {
+    enum ColorType: String {
         case LoginBackground = "login-background"
         case LoginToxLogo = "login-tox-logo"
         case LoginButtonText = "login-button-text"
@@ -133,7 +133,7 @@ class Theme {
 
     init(yamlString: String) throws {
         guard let dictionary = Yaml.load(yamlString).value?.dictionary else {
-            throw ErrorTheme.CannotParseFile(String(localized:"theme_error_cannot_open"))
+            throw ErrorTheme.cannotParseFile(String(localized:"theme_error_cannot_open"))
         }
 
         try checkVersion(dictionary)
@@ -142,7 +142,7 @@ class Theme {
         try validateMappedColors(mappedColors)
     }
 
-    func colorForType(type: Type) -> UIColor {
+    func colorForType(_ type: ColorType) -> UIColor {
         return mappedColors[type.rawValue]!
     }
 
@@ -159,7 +159,7 @@ class Theme {
         return UIColor(red: red, green: green, blue: blue, alpha: alpha)
     }
 
-    private var mappedColors: [String: UIColor]!
+    fileprivate var mappedColors: [String: UIColor]!
 }
 
 private extension Theme {
@@ -170,13 +170,13 @@ private extension Theme {
         static let ValuesKey = "values"
     }
 
-    func checkVersion(dictionary: [Yaml: Yaml]) throws {
+    func checkVersion(_ dictionary: [Yaml: Yaml]) throws {
         guard let version = dictionary[Yaml.String(Constants.VersionKey)]?.int else {
-            throw ErrorTheme.CannotParseFile(String(localized:"theme_error_cannot_open"))
+            throw ErrorTheme.cannotParseFile(String(localized:"theme_error_cannot_open"))
         }
 
         guard version == Constants.VersionValue else {
-            throw ErrorTheme.WrongVersion(String(localized: "theme_error_cannot_open"))
+            throw ErrorTheme.wrongVersion(String(localized: "theme_error_cannot_open"))
         }
     }
 
@@ -192,7 +192,7 @@ private extension Theme {
 
         for (key, value) in valuesDict {
             guard let color = colorsDict[value] else {
-                throw ErrorTheme.CannotParseFile(String(localized: "theme_error_cannot_open", value))
+                throw ErrorTheme.cannotParseFile(String(localized: "theme_error_cannot_open", value))
             }
 
             mappedColors[key] = color
@@ -201,9 +201,9 @@ private extension Theme {
         return mappedColors
     }
 
-    func parseDictionary<T>(dictionary: [Yaml: Yaml], forKey key: String, modifyValue: String -> T?) throws -> [String: T] {
+    func parseDictionary<T>(_ dictionary: [Yaml: Yaml], forKey key: String, modifyValue: (String) -> T?) throws -> [String: T] {
         guard let yamlDict = dictionary[Yaml.String(key)]?.dictionary else {
-            throw ErrorTheme.CannotParseFile(String(localized: "theme_error_cannot_open", key))
+            throw ErrorTheme.cannotParseFile(String(localized: "theme_error_cannot_open", key))
         }
 
         var resultDict = [String: T]()
@@ -212,7 +212,7 @@ private extension Theme {
             guard let key = keyYaml.string,
                   let originalValue = valueYaml.string,
                   let valueToSet = modifyValue(originalValue) else {
-                throw ErrorTheme.CannotParseFile(String(localized: "theme_error_cannot_open", keyYaml.description, valueYaml.description))
+                throw ErrorTheme.cannotParseFile(String(localized: "theme_error_cannot_open", keyYaml.description, valueYaml.description))
             }
 
             resultDict[key] = valueToSet
@@ -221,10 +221,10 @@ private extension Theme {
         return resultDict
     }
 
-    func validateMappedColors(dictionary: [String: UIColor]) throws {
-        for type in Type.allValues {
+    func validateMappedColors(_ dictionary: [String: UIColor]) throws {
+        for type in ColorType.allValues {
             guard let _ = dictionary[type.rawValue] else {
-                throw ErrorTheme.CannotParseFile(String(localized: "theme_error_cannot_open", type.rawValue))
+                throw ErrorTheme.cannotParseFile(String(localized: "theme_error_cannot_open", type.rawValue))
             }
         }
     }

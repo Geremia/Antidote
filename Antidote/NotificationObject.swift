@@ -9,13 +9,13 @@
 import Foundation
 
 enum NotificationAction {
-    case OpenChat(chatUniqueIdentifier: String)
-    case OpenRequest(requestUniqueIdentifier: String)
-    case AnswerIncomingCall(userInfo: String)
+    case openChat(chatUniqueIdentifier: String)
+    case openRequest(requestUniqueIdentifier: String)
+    case answerIncomingCall(userInfo: String)
 }
 
 extension NotificationAction {
-    private struct Constants {
+    fileprivate struct Constants {
         static let ValueKey = "ValueKey"
         static let ArgumentKey = "ArgumentKey"
 
@@ -34,17 +34,17 @@ extension NotificationAction {
                 guard let argument = dictionary[Constants.ArgumentKey] else {
                     return nil
                 }
-                self = OpenChat(chatUniqueIdentifier: argument)
+                self = .openChat(chatUniqueIdentifier: argument)
             case Constants.OpenRequestValue:
                 guard let argument = dictionary[Constants.ArgumentKey] else {
                     return nil
                 }
-                self = OpenRequest(requestUniqueIdentifier: argument)
+                self = .openRequest(requestUniqueIdentifier: argument)
             case Constants.AnswerIncomingCallValue:
                 guard let argument = dictionary[Constants.ArgumentKey] else {
                     return nil
                 }
-                self = AnswerIncomingCall(userInfo: argument)
+                self = .answerIncomingCall(userInfo: argument)
             default:
                 return nil
         }
@@ -52,17 +52,17 @@ extension NotificationAction {
 
     func archive() -> [String: String] {
         switch self {
-            case .OpenChat(let identifier):
+            case .openChat(let identifier):
                 return [
                     Constants.ValueKey: Constants.OpenChatValue,
                     Constants.ArgumentKey: identifier,
                 ]
-            case .OpenRequest(let identifier):
+            case .openRequest(let identifier):
                 return [
                     Constants.ValueKey: Constants.OpenRequestValue,
                     Constants.ArgumentKey: identifier,
                 ]
-            case .AnswerIncomingCall(let userInfo):
+            case .answerIncomingCall(let userInfo):
                 return [
                     Constants.ValueKey: Constants.AnswerIncomingCallValue,
                     Constants.ArgumentKey: userInfo,

@@ -22,7 +22,7 @@ class ActiveSessionNavigationCoordinator {
         self.navigationController = navigationController
     }
 
-    func startWithOptions(options: CoordinatorOptions?) {
+    func startWithOptions(_ options: CoordinatorOptions?) {
         preconditionFailure("This method must be overridden")
     }
 }

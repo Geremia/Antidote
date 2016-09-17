@@ -29,7 +29,7 @@ class BaseCell: UITableViewCell {
     /**
         Override this method in subclass.
      */
-    func setupWithTheme(theme: Theme, model: BaseCellModel) {}
+    func setupWithTheme(_ theme: Theme, model: BaseCellModel) {}
 
     /**
         Override this method in subclass.

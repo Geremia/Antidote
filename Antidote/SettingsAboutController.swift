@@ -9,12 +9,12 @@
 import Foundation
 
 class SettingsAboutController: StaticTableController {
-    private let antidoteVersionModel = StaticTableInfoCellModel()
-    private let antidoteBuildModel = StaticTableInfoCellModel()
-    private let toxcoreVersionModel = StaticTableInfoCellModel()
+    fileprivate let antidoteVersionModel = StaticTableInfoCellModel()
+    fileprivate let antidoteBuildModel = StaticTableInfoCellModel()
+    fileprivate let toxcoreVersionModel = StaticTableInfoCellModel()
 
     init(theme: Theme) {
-        super.init(theme: theme, style: .Grouped, model: [
+        super.init(theme: theme, style: .grouped, model: [
             [
                 antidoteVersionModel,
                 antidoteBuildModel,
@@ -36,10 +36,10 @@ class SettingsAboutController: StaticTableController {
 private extension SettingsAboutController {
     func updateModels() {
         antidoteVersionModel.title = String(localized: "settings_antidote_version")
-        antidoteVersionModel.value =  NSBundle.mainBundle().infoDictionary?["CFBundleShortVersionString"] as? String
+        antidoteVersionModel.value =  Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
 
         antidoteBuildModel.title = String(localized: "settings_antidote_build")
-        antidoteBuildModel.value = NSBundle.mainBundle().infoDictionary?["CFBundleVersion"] as? String
+        antidoteBuildModel.value = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
 
         toxcoreVersionModel.title = String(localized: "settings_toxcore_version")
         toxcoreVersionModel.value = OCTTox.version()

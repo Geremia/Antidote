@@ -14,11 +14,11 @@ private struct Constants {
 }
 
 class StaticTableAvatarCell: StaticTableBaseCell {
-    private var didTapOnAvatar: (StaticTableAvatarCell -> Void)?
+    fileprivate var didTapOnAvatar: ((StaticTableAvatarCell) -> Void)?
 
-    private var button: UIButton!
+    fileprivate var button: UIButton!
 
-    override func setupWithTheme(theme: Theme, model: BaseCellModel) {
+    override func setupWithTheme(_ theme: Theme, model: BaseCellModel) {
         super.setupWithTheme(theme, model: model)
 
         guard let avatarModel = model as? StaticTableAvatarCellModel else {
@@ -26,10 +26,10 @@ class StaticTableAvatarCell: StaticTableBaseCell {
             return
         }
 
-        selectionStyle = .None
+        selectionStyle = .none
 
-        button.userInteractionEnabled = avatarModel.userInteractionEnabled
-        button.setImage(avatarModel.avatar, forState: .Normal)
+        button.isUserInteractionEnabled = avatarModel.userInteractionEnabled
+        button.setImage(avatarModel.avatar, for: UIControlState())
         didTapOnAvatar = avatarModel.didTapOnAvatar
     }
 
@@ -39,14 +39,14 @@ class StaticTableAvatarCell: StaticTableBaseCell {
         button = UIButton()
         button.layer.cornerRadius = StaticTableAvatarCellModel.Constants.AvatarImageSize / 2
         button.layer.masksToBounds = true
-        button.addTarget(self, action: #selector(StaticTableAvatarCell.buttonPressed), forControlEvents: .TouchUpInside)
+        button.addTarget(self, action: #selector(StaticTableAvatarCell.buttonPressed), for: .touchUpInside)
         customContentView.addSubview(button)
     }
 
     override func installConstraints() {
         super.installConstraints()
 
-        button.snp_makeConstraints {
+        button.snp.makeConstraints {
             $0.centerX.equalTo(customContentView)
             $0.top.equalTo(customContentView).offset(Constants.AvatarVerticalOffset)
             $0.bottom.equalTo(customContentView).offset(-Constants.AvatarVerticalOffset)

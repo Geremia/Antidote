@@ -15,7 +15,7 @@ protocol TopCoordinatorProtocol: CoordinatorProtocol {
         - Parameters:
           - notification: Notification to handle
      */
-    func handleLocalNotification(notification: UILocalNotification)
+    func handleLocalNotification(_ notification: UILocalNotification)
 
     /**
         Handle openURL request.
@@ -23,5 +23,5 @@ protocol TopCoordinatorProtocol: CoordinatorProtocol {
         - Parameters:
           - url: URL to handle.
      */
-    func handleInboxURL(url: NSURL)
+    func handleInboxURL(_ url: URL)
 }
