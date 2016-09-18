@@ -570,6 +570,7 @@
 		119AD1CB1BDEDD9C000C5CB8 /* UIColorExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColorExtension.swift; sourceTree = "<group>"; };
 		11A21EFA1C45BDB100E80A89 /* ChatPrivateController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatPrivateController.swift; sourceTree = "<group>"; };
 		11A21EFC1C45BDF200E80A89 /* ChatInputView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatInputView.swift; sourceTree = "<group>"; };
+		11AE46DC1D8E94F1000F95D8 /* Antidote.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Antidote.entitlements; sourceTree = "<group>"; };
 		11B252F91C4A614D0068F47C /* ChatIncomingTextCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatIncomingTextCell.swift; sourceTree = "<group>"; };
 		11B252FD1C4A615E0068F47C /* ChatOutgoingTextCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatOutgoingTextCell.swift; sourceTree = "<group>"; };
 		11B253011C4A61D00068F47C /* ChatMovableDateCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatMovableDateCell.swift; sourceTree = "<group>"; };
@@ -780,6 +781,7 @@
 		1164763819794D3300DB20B8 /* Antidote */ = {
 			isa = PBXGroup;
 			children = (
+				11AE46DC1D8E94F1000F95D8 /* Antidote.entitlements */,
 				F902D28D1ADED27A0070A3F5 /* Application */,
 				1193AB561C1F565B006AA9E5 /* Cells */,
 				1173F06C1BC5D9B000B88B7B /* Classes */,
@@ -848,7 +850,7 @@
 			isa = PBXGroup;
 			children = (
 				1173EFD01BC5C6B300B88B7B /* SnapKit.framework */,
-				1173EFD41BC5C6B300B88B7B /* SnapKit iOS Tests.xctest */,
+				1173EFD41BC5C6B300B88B7B /* SnapKit Tests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1179,10 +1181,16 @@
 					1164762E19794D3300DB20B8 = {
 						DevelopmentTeam = NHVF8NSG3J;
 						LastSwiftMigration = 0800;
+						SystemCapabilities = {
+							com.apple.Keychain = {
+								enabled = 1;
+							};
+						};
 					};
 					1173F0551BC5D94400B88B7B = {
 						CreatedOnToolsVersion = 7.0;
 						LastSwiftMigration = 0800;
+						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
 								enabled = 1;
@@ -1254,7 +1262,7 @@
 			remoteRef = 1173EFCF1BC5C6B300B88B7B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		1173EFD41BC5C6B300B88B7B /* SnapKit iOS Tests.xctest */ = {
+		1173EFD41BC5C6B300B88B7B /* SnapKit Tests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = "SnapKit Tests.xctest";
@@ -1894,6 +1902,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_STATIC_ANALYZER_MODE = deep;
+				CODE_SIGN_ENTITLEMENTS = Antidote/Antidote.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				ENABLE_BITCODE = NO;
@@ -1922,6 +1931,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_STATIC_ANALYZER_MODE = deep;
+				CODE_SIGN_ENTITLEMENTS = Antidote/Antidote.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				ENABLE_BITCODE = NO;
@@ -1949,6 +1959,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -1973,6 +1984,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
